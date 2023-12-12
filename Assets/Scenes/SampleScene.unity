@@ -341,6 +341,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e548198f31ebc9746b573bedb003af31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cameraContainer: {fileID: 1800299052}
+  minXLook: -85
+  maxXLook: 85
+  lookSensitivity: 0.2
 --- !u!54 &1000904751
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -461,7 +465,19 @@ MonoBehaviour:
     m_ActionId: 2e77abba-91db-4718-9f0e-047f49255629
     m_ActionName: Main/PauseMenu[/Keyboard/escape]
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1000904750}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnLookInput
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: f74a71d8-998a-45fa-8708-98a80243175a
     m_ActionName: Main/Look[/Mouse/delta]
   m_NeverAutoSwitchControlSchemes: 0
