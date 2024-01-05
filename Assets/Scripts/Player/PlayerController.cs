@@ -1,16 +1,13 @@
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Numerics;
 using UnityEngine;
-using UnityEngine.Animations;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed;
-    private UnityEngine.Vector2 curMovementInput;
+    private Vector2 curMovementInput;
     public float jumpForce;
     public LayerMask groundLayerMask;
 
@@ -21,8 +18,9 @@ public class PlayerController : MonoBehaviour
     private float camCurXRot;
     public float lookSensitivity;
 
-    private UnityEngine.Vector2 mouseDelta;
+    private Vector2 mouseDelta;
 
+    // components
     private Rigidbody rig;
 
     void Awake ()
@@ -31,84 +29,88 @@ public class PlayerController : MonoBehaviour
         rig = GetComponent<Rigidbody>();
     }
 
-    void Start()
+    void Start ()
     {
+        // lock the cursor at the start of the game
         Cursor.lockState = CursorLockMode.Locked;
     }
 
-    void FixedUpdate()
+    void FixedUpdate ()
     {
         Move();
     }
 
-    void LateUpdate() 
+    void LateUpdate ()
     {
         CameraLook();
     }
 
-    void Move()
+    void Move ()
     {
-        UnityEngine.Vector3 dir = transform.forward * curMovementInput.y + transform.right * curMovementInput.x;
+        // calculate the move direction relative to where we're facing.
+        Vector3 dir = transform.forward * curMovementInput.y + transform.right * curMovementInput.x;
         dir *= moveSpeed;
         dir.y = rig.velocity.y;
+
+        // assign our Rigidbody velocity
         rig.velocity = dir;
     }
 
-    void CameraLook() 
+    void CameraLook ()
     {
+        // rotate the camera container up and down
         camCurXRot += mouseDelta.y * lookSensitivity;
         camCurXRot = Mathf.Clamp(camCurXRot, minXLook, maxXLook);
-        cameraContainer.localEulerAngles = new UnityEngine.Vector3(-camCurXRot, 0, 0);
+        cameraContainer.localEulerAngles = new Vector3(-camCurXRot, 0, 0);
 
-        transform.eulerAngles += new UnityEngine.Vector3(0, mouseDelta.x * lookSensitivity, 0);
+        // rotate the player left and right
+        transform.eulerAngles += new Vector3(0, mouseDelta.x * lookSensitivity, 0);
     }
 
-    public void OnLookInput(InputAction.CallbackContext context) 
+    // called when we move our mouse - managed by the Input System
+    public void OnLookInput (InputAction.CallbackContext context)
     {
-        mouseDelta = context.ReadValue<UnityEngine.Vector2>();
+        mouseDelta = context.ReadValue<Vector2>();
     }
 
-        public void OnMoveInput(InputAction.CallbackContext context) 
+    // called when we press WASD - managed by the Input System
+    public void OnMoveInput (InputAction.CallbackContext context)
     {
+        // are we holding down a movement button?
         if(context.phase == InputActionPhase.Performed)
         {
-            curMovementInput = context.ReadValue<UnityEngine.Vector2>();
-        } 
+            curMovementInput = context.ReadValue<Vector2>();
+        }
+        // have we let go of a movement button?
         else if(context.phase == InputActionPhase.Canceled)
         {
-            curMovementInput = UnityEngine.Vector2.zero;
+            curMovementInput = Vector2.zero;
         }
     }
 
+    // called when we press down on the spacebar - managed by the Input System
     public void OnJumpInput (InputAction.CallbackContext context)
     {
+        // is this the first frame we're pressing the button?
         if(context.phase == InputActionPhase.Started)
         {
+            // are we standing on the ground?
             if(IsGrounded())
             {
-                rig.AddForce(UnityEngine.Vector3.up * jumpForce, ForceMode.Impulse);
+                // add force updwards
+                rig.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             }
         }
-    }
+    }    
 
-    private void OnDrawGizmos ()
-    {
-        Gizmos.color = Color.red;
-
-        Gizmos.DrawRay(transform.position + (transform.forward * 0.2f) + (UnityEngine.Vector3.up * 0.01f), UnityEngine.Vector3.down);
-        Gizmos.DrawRay(transform.position + (-transform.forward * 0.2f) + (UnityEngine.Vector3.up * 0.01f), UnityEngine.Vector3.down);
-        Gizmos.DrawRay(transform.position + (transform.right * 0.2f) + (UnityEngine.Vector3.up * 0.01f), UnityEngine.Vector3.down);
-        Gizmos.DrawRay(transform.position + (-transform.right * 0.2f) + (UnityEngine.Vector3.up * 0.01f), UnityEngine.Vector3.down);
-    }
-
-    bool IsGrounded()
+    bool IsGrounded ()
     {
         Ray[] rays = new Ray[4]
         {
-            new Ray(transform.position + (transform.forward * 0.2f), UnityEngine.Vector3.down),
-            new Ray(transform.position + (-transform.forward * 0.2f), UnityEngine.Vector3.down),
-            new Ray(transform.position + (-transform.right * 0.2f), UnityEngine.Vector3.down),
-            new Ray(transform.position + (transform.right * 0.2f), UnityEngine.Vector3.down)
+            new Ray(transform.position + (transform.forward * 0.2f) + (Vector3.up * 0.01f), Vector3.down),
+            new Ray(transform.position + (-transform.forward * 0.2f) + (Vector3.up * 0.01f), Vector3.down),
+            new Ray(transform.position + (transform.right * 0.2f) + (Vector3.up * 0.01f), Vector3.down),
+            new Ray(transform.position + (-transform.right * 0.2f) + (Vector3.up * 0.01f), Vector3.down)
         };
 
         for(int i = 0; i < rays.Length; i++)
@@ -118,7 +120,17 @@ public class PlayerController : MonoBehaviour
                 return true;
             }
         }
-        
+
         return false;
+    }
+
+    private void OnDrawGizmos ()
+    {
+        Gizmos.color = Color.red;
+
+        Gizmos.DrawRay(transform.position + (transform.forward * 0.2f), Vector3.down);
+        Gizmos.DrawRay(transform.position + (-transform.forward * 0.2f), Vector3.down);
+        Gizmos.DrawRay(transform.position + (transform.right * 0.2f), Vector3.down);
+        Gizmos.DrawRay(transform.position + (-transform.right * 0.2f), Vector3.down);
     }
 }
